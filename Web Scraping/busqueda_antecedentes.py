@@ -38,7 +38,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 # fullpath = os.path.join(filename)
 archivo = pd.read_csv("C:/Users/CO-182/Documents/GitHub/consulta_antecedentes/Datos/Con Hallazgos.csv")
 #Numero de registros a buscar   
-datos = archivo.iloc[0:5]
+datos = archivo.iloc[0:2]
 
 #Datos de consulta
 Primer_Nombre =  []
@@ -64,12 +64,14 @@ desmovilizados=[]
 rama_unificada=[]
 europol=[]
 medidas_correctivas=[]
-#Pruebas cristian
+antecedentes_procuraduria=[]
+
+
 options =  webdriver.ChromeOptions()
 options.add_argument('--start-maximized')
 options.add_argument('--disable-extensions')
 driver_path = 'C:\\Users\\CO-182\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\site-packages\\chromedriver.exe'
-# Opciones de navegación
+
 options = Options()
 
 appState = {
@@ -566,9 +568,132 @@ for i in datos.index:
         driver.execute_script('window.print();')
 
     time.sleep(1)
-    os.replace("Consultas\\MEDIDAS_CORRECTIVAS_.pdf", "Consultas\\MEDIDAS_CORRECTIVAS_"+str(Documento[i])+".pdf")
+    try:
+        os.replace("Consultas\\MEDIDAS_CORRECTIVAS_.pdf", "Consultas\\MEDIDAS_CORRECTIVAS_"+str(Documento[i])+".pdf")
+    except:
+        continue
+    #Antecedentes procuraduría
+    try:
+        # Inicio de la navegación 
+        driver.get('https://www.procuraduria.gov.co/Pages/Consulta-de-Antecedentes.aspx')
+        time.sleep(0.5)
+        # Cambiar al iframe
+        element = driver.find_element(By.CLASS_NAME,'embed-responsive-item')
+        driver.switch_to.frame(element)
+        validador=0
+        for x in range(10):
+            #Obtener la pregunta de seguridad y validar respuestas que se tengan
+            time.sleep(3)        
+            pregunta=driver.find_element(By.XPATH,'//*[@id="lblPregunta"]').text
+            if(pregunta.__contains__('Cuanto es 9 - 2')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys('7')
+                validador=1
+                break
+            elif(pregunta.__contains__('dos primeras letras del primer nombre')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys(str(Primer_Nombre[i])[:2])
+                validador=1
+                break
+            elif(pregunta.__contains__('dos ultimos digitos del documento')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys(str(Documento[i])[len(str(Documento[i]))-2:len(str(Documento[i]))])
+                validador=1
+                break
+            elif(pregunta.__contains__('cantidad de letras del primer nombre')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys(len(str(Primer_Nombre[i])))
+                validador=1
+                break
+            elif(pregunta.__contains__('tres primeros digitos del documento a consultar')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys(str(Documento[i])[:3])
+                validador=1
+                break
+            elif(pregunta.__contains__('Capital del Atlantico')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys('barranquilla')
+                validador=1
+                break
+            elif(pregunta.__contains__('Capital de Antioquia')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys('medellin')
+                validador=1
+                break
+            elif(pregunta.__contains__('6 + 2')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys('8')
+                validador=1
+                break
+            elif(pregunta.__contains__('3 - 2')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys('1')
+                validador=1
+                break
+            elif(pregunta.__contains__('2 X 3')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys('6')
+                validador=1
+                break
+            elif(pregunta.__contains__('Capital de Colombia')):
+                WebDriverWait(driver,2)\
+                    .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtRespuestaPregunta"]')))\
+                    .send_keys('bogota')
+                validador=1
+                break
+            else:
+                driver.execute_script("location.reload()")
+        if(validador==1):
+            WebDriverWait(driver, 1)\
+                .until(EC.element_to_be_clickable((By.ID,'ddlTipoID')))\
+                .send_keys(str(Tipo_Documento[i]))
+            time.sleep(1)
+            WebDriverWait(driver, 1)\
+                .until(EC.element_to_be_clickable((By.ID,'txtNumID')))\
+                .send_keys(str(Documento[i]))
+            time.sleep(1)  
+            WebDriverWait(driver, 1)\
+                .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="btnConsultar"]')))\
+                .click()
+            time.sleep(10)   
+            for x in range(20):
+                try:
+                    resultado=driver.find_element(By.XPATH,'//*[@id="divSec"]/h2[2]').text
+                    if(resultado.__contains__('El ciudadano no presenta antecedentes')):
+                        antecedentes_procuraduria.append('SIN RESULTADOS')
+                        break
+                    else:
+                        antecedentes_procuraduria.append('CON HALLAZGO') 
+                        break
+                except:
+                    time.sleep(2)           
+        else:
+            antecedentes_procuraduria.append('FUENTE NO DISPONIBLE')
+    except:
+            antecedentes_procuraduria.append('FUENTE NO DISPONIBLE')
 
-    # pdfs = [os.path.join(directorio,'INTERPOL_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'OFAC_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'SISBEN_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'SIMIT_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'ONU_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'DESMOVILIZADOS_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'RAMA_UNIFICADA_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'EUROPOL_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'MEDIDAS_CORRECTIVAS_'+str(Documento[i])+'.pdf')]
+    driver.execute_script('window.print();')  
+    time.sleep(1)  
+    try:
+        os.replace("Consultas\\Consulta de Antecedentes.pdf", "Consultas\\ANTECEDENTES_PROCURADURIA_"+str(Documento[i])+".pdf") 
+    except:
+        try:
+            os.replace("Consultas\\www.procuraduria.gov.co.pdf", "Consultas\\ANTECEDENTES_PROCURADURIA_"+str(Documento[i])+".pdf")
+        except:
+            continue
+
+    # pdfs = [os.path.join(directorio,'INTERPOL_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'OFAC_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'SISBEN_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'SIMIT_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'ONU_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'DESMOVILIZADOS_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'RAMA_UNIFICADA_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'EUROPOL_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'MEDIDAS_CORRECTIVAS_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'ANTECEDENTES_PROCURADURIA_'+str(Documento[i])+'.pdf')]
+    
     
     # merger = PdfFileMerger()
 
@@ -584,7 +709,7 @@ driver.quit()
 #Dataframe de almacenamiento
 data = pd.DataFrame({'PRIMER_NOMBRE':Primer_Nombre, 'SEGUNDO_NOMBRE':Segundo_Nombre, 'PRIMER_APELLIDO':Primer_Apellido,'SEGUNDO_APELLIDO':Sengundo_Apellido,
 'EDAD':Edad,'FECHA_EXPEDICION':Fecha_Expedicion,'TIPO_DE_DEOCUMENTO':Tipo_Documento,'DOCUMENTO':Documento,'DEPARTAMENTO':Departamento,'CIUDAD':Ciudad,
-'INTERPOL':interpol,'OFAC':ofac,'SISBEN':sisben,'SIMIT':simit,'ONU':onu,'DESMOVILIZADOS':desmovilizados,'RAMA_UNIFICADA':rama_unificada,'EUROPOL':europol,'MEDIDAS CORRECTIVAS':medidas_correctivas})
+'INTERPOL':interpol,'OFAC':ofac,'SISBEN':sisben,'SIMIT':simit,'ONU':onu,'DESMOVILIZADOS':desmovilizados,'RAMA_UNIFICADA':rama_unificada,'EUROPOL':europol,'MEDIDAS CORRECTIVAS':medidas_correctivas,'ANTECEDENTES_PROCURADURIA':antecedentes_procuraduria})
 #,'proveedores_ficticios',
 # 'concordato','desmovilizados',
 # 'rama_judicial','ruaf','secop_s',
