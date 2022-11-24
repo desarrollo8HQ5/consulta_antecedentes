@@ -5,6 +5,8 @@ import os
 import time
 import glob
 import win32com.client
+from PIL import Image
+from PyPDF2 import PdfFileMerger, PdfFileReader
 
 import httplib2
 import numpy as np
@@ -36,7 +38,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 # fullpath = os.path.join(filename)
 archivo = pd.read_csv("C:/Users/CO-182/Documents/GitHub/consulta_antecedentes/Datos/Con Hallazgos.csv")
 #Numero de registros a buscar   
-datos = archivo.iloc[0:4]
+datos = archivo.iloc[0:2]
 #Datos de consulta
 Primer_Nombre =  []
 Segundo_Nombre =  []
@@ -59,6 +61,7 @@ simit=[]
 onu=[]
 desmovilizados=[]
 europol=[]
+medidas_correctivas=[]
 #Pruebas cristian
 options =  webdriver.ChromeOptions()
 options.add_argument('--start-maximized')
@@ -81,19 +84,19 @@ options.headless = False
 options.add_argument('--start-maximized')
 options.add_argument('--disable-extensions')
 
-#directorio = "D:\\Documentos\\HQ5\\ciencia de datos\\Reto\\Documentos\\Sisben"
-directorio = "C:\\Users\\CO-182\\Documents\\GitHub\\consulta_antecedentes\\Documentos"
+#directorio = "D:\\Consultas\\HQ5\\ciencia de datos\\Reto\\Consultas\\Sisben"
+directorio = "C:\\Users\\CO-182\\Documents\\GitHub\\consulta_antecedentes\\Consultas"
 
 prefs = {
     "printing.print_preview_sticky_settings.appState": json.dumps(appState),
     'savefile.default_directory':directorio,
-    "download.default_directory":directorio
+    'download.default_directory':directorio
 }
 options.add_experimental_option("prefs", prefs)
 options.add_argument('--kiosk-printing')
 
 driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
-time.sleep(1)
+time.sleep(0.5)
 #Pruebas Cristian Fin
 
 for i in datos.index:
@@ -120,28 +123,62 @@ for i in datos.index:
     month = Fecha_birth[1]
     year = Fecha_birth[2]
 
-    #Rama unificada
-    #Inicio de la navegación 
-    driver.get('https://eumostwanted.eu/es')
-    try:
-        time.sleep(1)
-        WebDriverWait(driver, 2)\
-            .until(EC.element_to_be_clickable((By.CSS_SELECTOR,'input#edit-search-block-form--2')))\
-            .send_keys(Primer_Apellido[i]+", "+Primer_Nombre[i])
 
-        WebDriverWait(driver, 5)\
-            .until(EC.element_to_be_clickable((By.CSS_SELECTOR,'button#edit-submit.secondary button radius postfix expand form-submit'.replace(' ', '.'))))\
+    #Medidas correctivas
+    #Inicio de la navegación 
+    driver.get('https://srvcnpc.policia.gov.co/PSC/frm_cnp_consulta.aspx')
+    time.sleep(0.5)
+    try:
+        WebDriverWait(driver, 1)\
+            .until(EC.element_to_be_clickable((By.ID,'ctl00_ContentPlaceHolder3_ddlTipoDoc')))\
+            .send_keys(str(Tipo_Documento[i]))
+        time.sleep(0.5)
+
+        WebDriverWait(driver, 1)\
+            .until(EC.element_to_be_clickable((By.ID,'ctl00_ContentPlaceHolder3_txtExpediente')))\
+            .send_keys(str(Documento[i]))
+        time.sleep(0.5)
+
+        if  str(Tipo_Documento[i]) in ('CEDULA DE CIUDADANIA'):
+            WebDriverWait(driver, 1)\
+                .until(EC.element_to_be_clickable((By.ID,'txtFechaexp')))\
+                .send_keys(str(Fecha_Expedicion[i]))
+            time.sleep(0.5)
+            boton_busqueda = '//*[@id="ctl00_ContentPlaceHolder3_btnConsultar2"]'
+        else:
+            boton_busqueda =  '//*[@id="ctl00_ContentPlaceHolder3_btnConsultar"]'
+
+
+        WebDriverWait(driver, 1)\
+            .until(EC.element_to_be_clickable((By.XPATH,boton_busqueda)))\
             .click()
-            
-        time.sleep(1)
-        result = driver.find_element(By.ID,'#searchResults').text
-        print(result)
-        europol.append('FUENTE DISPONIBLE')
+        time.sleep(0.5)
+
+        result = driver.find_element(By.XPATH,'//*[@id="flotante"]').text
+
+        if(result.__contains__('NO TIENE MEDIDAS CORRECTIVAS PENDIENTES POR CUMPLIR')):
+            driver.execute_script('document.title="MEDIDAS_CORRECTIVAS_"')
+            WebDriverWait(driver,1)\
+                .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="ctl00_ContentPlaceHolder3_btnImprimir2"]')))\
+                .click()
+            medidas_correctivas.append('SIN RESULTADO')
+        else:  
+            WebDriverWait(driver,1)\
+                .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="ctl00_ContentPlaceHolder3_gv_expedientes"]/tbody/tr[2]/td[1]/a')))\
+                .click()
+            time.sleep(0.5)
+            driver.execute_script('document.title="MEDIDAS_CORRECTIVAS_"')
+            driver.execute_script('window.print();')
+            medidas_correctivas.append('CON HALLAZGO') 
+
     except:
-        europol.append('FUENTE NO DISPONIBLE')
-        # driver.execute_script('window.print();')
-        # time.sleep(2)
-        # os.replace("Documentos\\Consulta de Procesos por Nombre o Razón Social- Consejo Superior de la Judicatura.pdf", "Documentos\\RAMA_UNIFICADA_"+str(Documento[i])+".pdf")
+        driver.execute_script('document.title="MEDIDAS_CORRECTIVAS_"')
+        medidas_correctivas.append('FUENTE NO DISPONIBLE')
+        driver.execute_script('window.print();')
+
+    time.sleep(0.5)
+    os.replace("Consultas\\MEDIDAS_CORRECTIVAS_.pdf", "Consultas\\MEDIDAS_CORRECTIVAS_"+str(Documento[i])+".pdf")
+
 driver.quit()
-data = pd.DataFrame({'DOCUMENTO':Documento,'RAMA_UNIFICADA':europol})
-data.to_csv('Archivos/Antecedentes.csv', index=True)
+data = pd.DataFrame({'DOCUMENTO':Documento,'MEDIDAS CORRECTIVAS':medidas_correctivas})
+data.to_csv('Reporte/Antecedentes.csv', index=True)
