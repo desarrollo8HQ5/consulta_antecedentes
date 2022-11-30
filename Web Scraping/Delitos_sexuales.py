@@ -49,8 +49,7 @@ personeria=[]
 medidas_correctivas=[]
 antecedentes_judiciales=[]
 delitos_sexuales=[]
-pep=[]
-cpp=[]
+
 options =  webdriver.ChromeOptions()
 options.add_argument('--start-maximized')
 options.add_argument('--disable-extensions')
@@ -111,51 +110,53 @@ for i in datos.index:
     year = Fecha_birth[2]
 
 
-    #CONSULTA ANTECEDENTES FISCALES
+    #Delitos sexuales
     # try:
-    #     Inicio de la navegación  
-    driver.get('https://www.contraloria.gov.co/web/guest/persona-natural')
-    time.sleep(1)
-    driver.execute_script('window.scrollTo(0,800)')
-    time.sleep(1)
-    elemet=driver.find_element(By.XPATH,'//*[@id="fragment-0-ttuq"]/div/iframe')
-    driver.switch_to.frame(elemet)
-    WebDriverWait(driver, 2)\
-        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="ddlTipoDocumento"]')))\
+    #     # Inicio de la navegación  
+    driver.get('https://inhabilidades.policia.gov.co:8080/')
+    WebDriverWait(driver,1)\
+        .until(EC.element_to_be_clickable((By.ID,'tipo')))\
         .send_keys(str(Tipo_Documento[i]))
-    time.sleep(1)
-
-    WebDriverWait(driver, 2)\
-        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtNumeroDocumento"]')))\
+    WebDriverWait(driver,1)\
+        .until(EC.element_to_be_clickable((By.ID,'nuip')))\
         .send_keys(str(Documento[i]))
+    WebDriverWait(driver,1)\
+        .until(EC.element_to_be_clickable((By.ID,'fechaExpNuip')))\
+        .send_keys(str(Fecha_Expedicion))
+    WebDriverWait(driver,1)\
+        .until(EC.element_to_be_clickable((By.ID,'nombreEmpresa')))\
+        .click()
+    WebDriverWait(driver,1)\
+        .until(EC.element_to_be_clickable((By.ID,'nombreEmpresa')))\
+        .send_keys('HQ5 S.A.S.')
+    WebDriverWait(driver,1)\
+        .until(EC.element_to_be_clickable((By.ID,'nitEmpresa')))\
+        .send_keys('901023218-0')
+    WebDriverWait(driver,1)\
+        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="frmCons"]/div[7]/label')))\
+        .click()
+    # Solucionar CAPTCHA
     time.sleep(20)
     WebDriverWait(driver,1)\
-        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="btnBuscar"]')))\
+        .until(EC.element_to_be_clickable((By.ID,'btnConsultar')))\
         .click()
-    time.sleep(10)
+    time.sleep(5)
+    #Obteniendo resultados
+    for r in range(20):
+        try:
+            result=driver.find_element(By.XPATH,'//*[@id="res"]/div/div/div/div/p[3]').text
+            break
+        except:
+            time.sleep(1)
     try:
-        os.replace('Consultas\\'+str(Documento[i])+'.PDF','Consultas\\ANTECEDENTES_FISCALES_'+str(Documento[i])+'.PDF')
-        # documentos.append('ANTECEDENTES_FISCALES_'+str(Documento[i])+'.PDF')
+        if(result.__contains__('NO REGISTRA INHABILIDAD')):
+            respuesta = 'SIN RESULTADOS'
+        else:
+            respuesta = 'CON HALLAZGO'
     except:
-        continue
-    # result = driver.find_element(By.XPATH,'//*[@id="P1_MSG_ESTADO_CONTAINER"]/div').text
-    # print(result)
-    # if(result.__contains__('No se encontraron datos')):
-    #     resultado='SIN RESULTADOS'
-    # else:
-    #     resultado='CON HALLAZGOS'
-    # except:
-    #     resultado = 'fuente no disponible'
-    # # Capturando evidencia de consulta
-    # time.sleep(2) 
-    # driver.execute_script('window.print();')  
-    # time.sleep(1) 
-    # try:
-    #     os.replace("Consultas\\Consulta pública de profesionales.pdf", "Consultas\\CPP_"+str(Documento[i])+".pdf") 
-    # except:
-    #     continue
-    # cpp.append(resultado)
-
+        respuesta = 'FUENTE NO DISPONIBLE'
+    delitos_sexuales.append(respuesta)
+    print(delitos_sexuales)
 driver.quit()
 # data = pd.DataFrame({'DOCUMENTO':Documento,'PERSONERIA':personeria})
 # data.to_csv('Reporte/Antecedentes.csv', index=True) 

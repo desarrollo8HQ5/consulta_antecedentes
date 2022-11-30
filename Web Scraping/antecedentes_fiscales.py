@@ -138,24 +138,5 @@ for i in datos.index:
         # documentos.append('ANTECEDENTES_FISCALES_'+str(Documento[i])+'.PDF')
     except:
         continue
-    # result = driver.find_element(By.XPATH,'//*[@id="P1_MSG_ESTADO_CONTAINER"]/div').text
-    # print(result)
-    # if(result.__contains__('No se encontraron datos')):
-    #     resultado='SIN RESULTADOS'
-    # else:
-    #     resultado='CON HALLAZGOS'
-    # except:
-    #     resultado = 'fuente no disponible'
-    # # Capturando evidencia de consulta
-    # time.sleep(2) 
-    # driver.execute_script('window.print();')  
-    # time.sleep(1) 
-    # try:
-    #     os.replace("Consultas\\Consulta pública de profesionales.pdf", "Consultas\\CPP_"+str(Documento[i])+".pdf") 
-    # except:
-    #     continue
-    # cpp.append(resultado)
 
 driver.quit()
-# data = pd.DataFrame({'DOCUMENTO':Documento,'PERSONERIA':personeria})
-# data.to_csv('Reporte/Antecedentes.csv', index=True) 

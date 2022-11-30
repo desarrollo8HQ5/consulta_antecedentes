@@ -1,5 +1,5 @@
 # Librerías para webscraping
-# Librerías complementarias
+# Librerías complmentarias
 import json
 import os
 import time
@@ -21,6 +21,21 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
+#Variables Globales
+#result = list()
+
+#Dataframe de almacenamiento
+# data = pd.DataFrame(columns=['primer_nombre', 'segundo_nombre', 'primer_apellido','segundo_apellido',
+# 'edad','fecha_expedicion','tipo_de_documento','documento','departamento','ciudad',
+# 'interpol','ofac','onu','proveedores_ficticios',
+# 'concordato','desmovilizados','personeria','personeria',
+# 'rama_judicial','simit','ruaf','secop_s',
+# 'peps','rnmc','libreta_militar','contadores_sancionados',
+# 'garantias_mobiliarias','secop','sisben'])
+
+#Importar datos
+# filename = "Datos/Con Hallazgos.csv"
+# fullpath = os.path.join(filename)
 archivo = pd.read_csv("C:/Users/CO-182/Documents/GitHub/consulta_antecedentes/Datos/Con Hallazgos.csv")
 #Numero de registros a buscar   
 datos = archivo.iloc[0:1]
@@ -48,14 +63,11 @@ desmovilizados=[]
 personeria=[]
 medidas_correctivas=[]
 antecedentes_judiciales=[]
-delitos_sexuales=[]
-pep=[]
-cpp=[]
+#Pruebas cristian
 options =  webdriver.ChromeOptions()
 options.add_argument('--start-maximized')
 options.add_argument('--disable-extensions')
 driver_path = 'C:\\Users\\CO-182\\AppData\\Local\\Programs\\Python\\Python310\\Lib\\site-packages\\chromedriver.exe'
-
 # Opciones de navegación
 options = Options()
 
@@ -73,6 +85,7 @@ options.headless = False
 options.add_argument('--start-maximized')
 options.add_argument('--disable-extensions')
 
+#directorio = "D:\\Consultas\\HQ5\\ciencia de datos\\Reto\\Consultas\\Sisben"
 directorio = "C:\\Users\\CO-182\\Documents\\GitHub\\consulta_antecedentes\\Consultas"
 
 prefs = {
@@ -85,6 +98,7 @@ options.add_argument('--kiosk-printing')
 
 driver = webdriver.Chrome(chrome_options=options, executable_path=driver_path)
 time.sleep(0.5)
+#Pruebas Cristian Fin
 
 for i in datos.index:
 
@@ -111,51 +125,49 @@ for i in datos.index:
     year = Fecha_birth[2]
 
 
-    #CONSULTA ANTECEDENTES FISCALES
+    #Antecedentes judiciales
     # try:
-    #     Inicio de la navegación  
-    driver.get('https://www.contraloria.gov.co/web/guest/persona-natural')
-    time.sleep(1)
-    driver.execute_script('window.scrollTo(0,800)')
-    time.sleep(1)
-    elemet=driver.find_element(By.XPATH,'//*[@id="fragment-0-ttuq"]/div/iframe')
-    driver.switch_to.frame(elemet)
-    WebDriverWait(driver, 2)\
-        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="ddlTipoDocumento"]')))\
-        .send_keys(str(Tipo_Documento[i]))
-    time.sleep(1)
-
-    WebDriverWait(driver, 2)\
-        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtNumeroDocumento"]')))\
-        .send_keys(str(Documento[i]))
-    time.sleep(20)
+    #     # Inicio de la navegación  
+    driver.get('https://antecedentes.policia.gov.co:7005/WebJudicial/antecedentes.xhtml')
+    time.sleep(3)
     WebDriverWait(driver,1)\
-        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="btnBuscar"]')))\
+        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="aceptaOption:0"]')))\
         .click()
+    time.sleep(1)
+    driver.execute_script("window.scrollTo(0,300)")
+    elemnt = driver.find_element(By.ID,'continuarBtn')
+    ActionChains(driver).click(elemnt).perform()
     time.sleep(10)
+    for r in range (20):
+        try:
+            driver.find_element(By.XPATH,'//*[@id="cedulaInput"]')
+            break
+        except:
+            time.sleep(1)
     try:
-        os.replace('Consultas\\'+str(Documento[i])+'.PDF','Consultas\\ANTECEDENTES_FISCALES_'+str(Documento[i])+'.PDF')
-        # documentos.append('ANTECEDENTES_FISCALES_'+str(Documento[i])+'.PDF')
+        WebDriverWait(driver,1)\
+            .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="cedulaInput"]')))\
+            .send_keys(str(Documento[i]))
+        time.sleep(1)
+        WebDriverWait(driver,1)\
+            .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="cedulaTipo"]')))\
+            .send_keys(str(Tipo_Documento[i]))
+        time.sleep(1)
+        for f in range(10):
+            frme = driver.find_element(By.XPATH,'//*[@id="captchaAntecedentes"]/div/div/iframe')
+            driver.switch_to.frame(frme)
+            WebDriverWait(driver,1)\
+                .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="recaptcha-anchor"]')))\
+                .click()
+            time.sleep(5)
+            driver.switch_to.default_content()
+            driver.execute_script("location.reload()")        
+            time.sleep(5)
     except:
-        continue
-    # result = driver.find_element(By.XPATH,'//*[@id="P1_MSG_ESTADO_CONTAINER"]/div').text
-    # print(result)
-    # if(result.__contains__('No se encontraron datos')):
-    #     resultado='SIN RESULTADOS'
-    # else:
-    #     resultado='CON HALLAZGOS'
-    # except:
-    #     resultado = 'fuente no disponible'
-    # # Capturando evidencia de consulta
-    # time.sleep(2) 
-    # driver.execute_script('window.print();')  
-    # time.sleep(1) 
-    # try:
-    #     os.replace("Consultas\\Consulta pública de profesionales.pdf", "Consultas\\CPP_"+str(Documento[i])+".pdf") 
-    # except:
-    #     continue
-    # cpp.append(resultado)
+        antecedentes_judiciales.append('FUENTE NO DISPONIBLE')
 
+    
+    print(antecedentes_judiciales)
 driver.quit()
 # data = pd.DataFrame({'DOCUMENTO':Documento,'PERSONERIA':personeria})
 # data.to_csv('Reporte/Antecedentes.csv', index=True) 

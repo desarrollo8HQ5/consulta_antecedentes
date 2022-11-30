@@ -49,8 +49,8 @@ personeria=[]
 medidas_correctivas=[]
 antecedentes_judiciales=[]
 delitos_sexuales=[]
-pep=[]
-cpp=[]
+inpec=[]
+
 options =  webdriver.ChromeOptions()
 options.add_argument('--start-maximized')
 options.add_argument('--disable-extensions')
@@ -111,51 +111,40 @@ for i in datos.index:
     year = Fecha_birth[2]
 
 
-    #CONSULTA ANTECEDENTES FISCALES
+    #Delitos sexuales
     # try:
-    #     Inicio de la navegación  
-    driver.get('https://www.contraloria.gov.co/web/guest/persona-natural')
-    time.sleep(1)
-    driver.execute_script('window.scrollTo(0,800)')
-    time.sleep(1)
-    elemet=driver.find_element(By.XPATH,'//*[@id="fragment-0-ttuq"]/div/iframe')
-    driver.switch_to.frame(elemet)
-    WebDriverWait(driver, 2)\
-        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="ddlTipoDocumento"]')))\
-        .send_keys(str(Tipo_Documento[i]))
-    time.sleep(1)
-
-    WebDriverWait(driver, 2)\
-        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtNumeroDocumento"]')))\
+    #     # Inicio de la navegación  
+    driver.get('https://mat.inpec.gov.co/consultasWeb/')
+    WebDriverWait(driver,1)\
+        .until(EC.element_to_be_clickable((By.ID,'solicitudTurno:identificacion')))\
         .send_keys(str(Documento[i]))
+    WebDriverWait(driver,1)\
+        .until(EC.element_to_be_clickable((By.ID,'solicitudTurno:apellido')))\
+        .send_keys(str(Primer_Apellido[i]))
+    # Solucionar CAPTCHA
     time.sleep(20)
     WebDriverWait(driver,1)\
-        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="btnBuscar"]')))\
+        .until(EC.element_to_be_clickable((By.ID,'solicitudTurno:j_idt18')))\
         .click()
-    time.sleep(10)
-    try:
-        os.replace('Consultas\\'+str(Documento[i])+'.PDF','Consultas\\ANTECEDENTES_FISCALES_'+str(Documento[i])+'.PDF')
-        # documentos.append('ANTECEDENTES_FISCALES_'+str(Documento[i])+'.PDF')
-    except:
-        continue
-    # result = driver.find_element(By.XPATH,'//*[@id="P1_MSG_ESTADO_CONTAINER"]/div').text
-    # print(result)
-    # if(result.__contains__('No se encontraron datos')):
-    #     resultado='SIN RESULTADOS'
-    # else:
-    #     resultado='CON HALLAZGOS'
+    time.sleep(5)
+    #Obteniendo resultados
+    for r in range(20):
+        try:
+            result=driver.find_element(By.CSS_SELECTOR,'span.ui-messages-info-summary').text
+            if(result.__contains__('No existe el inteno con esa identificacion y primer apellido')):
+                respuesta='SIN RESULTADO'
+            elif(result.__contains__('Catpcha incorecto')):
+                respuesta='FUENTE NO DISPONIBLE'
+            else:
+                respuesta='CON HALLAZGO'
+            break
+        except:
+            respuesta='FUENTE NO DISPONIBLE'
+            time.sleep(1)
     # except:
-    #     resultado = 'fuente no disponible'
-    # # Capturando evidencia de consulta
-    # time.sleep(2) 
-    # driver.execute_script('window.print();')  
-    # time.sleep(1) 
-    # try:
-    #     os.replace("Consultas\\Consulta pública de profesionales.pdf", "Consultas\\CPP_"+str(Documento[i])+".pdf") 
-    # except:
-    #     continue
-    # cpp.append(resultado)
-
+    #     respuesta = 'FUENTE NO DISPONIBLE'
+    # inpec.append(respuesta)
+print(respuesta)
 driver.quit()
 # data = pd.DataFrame({'DOCUMENTO':Documento,'PERSONERIA':personeria})
 # data.to_csv('Reporte/Antecedentes.csv', index=True) 

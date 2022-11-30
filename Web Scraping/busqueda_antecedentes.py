@@ -38,13 +38,13 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 # fullpath = os.path.join(filename)
 archivo = pd.read_csv("C:/Users/CO-182/Documents/GitHub/consulta_antecedentes/Datos/Con Hallazgos.csv")
 #Numero de registros a buscar   
-datos = archivo.iloc[0:2]
+datos = archivo.iloc[0:1]
 
 #Datos de consulta
 Primer_Nombre =  []
 Segundo_Nombre =  []
 Primer_Apellido =  []
-Sengundo_Apellido =  []
+Sengundo_Apellido =  [] 
 Nombres = []
 Apellidos = []
 Edad = []
@@ -55,6 +55,9 @@ Ciudad = []
 Documento = []
 Nacionalidad = []
 Fecha_Nacimiento=[]
+# PDFs
+documentos=[]
+# Consultas
 interpol = []
 ofac = []
 sisben=[]
@@ -64,9 +67,10 @@ desmovilizados=[]
 rama_unificada=[]
 europol=[]
 medidas_correctivas=[]
-antecedentes_procuraduria=[]
-
-
+procuraduria=[]
+personeria=[]
+pep=[]
+cpp=[]
 options =  webdriver.ChromeOptions()
 options.add_argument('--start-maximized')
 options.add_argument('--disable-extensions')
@@ -129,11 +133,6 @@ for i in datos.index:
     print(Nombres)
 
     #INTERPOL   
-    # Iniciarla en la pantalla 
-    # driver.set_window_position(200, 0)
-    # driver.maximize_window()
-    # time.sleep(1)
-
     #Inicio de la navegación
     try:
         driver.get('https://www.interpol.int/es/Como-trabajamos/Notificaciones/Ver-las-notificaciones-rojas')
@@ -182,8 +181,9 @@ for i in datos.index:
             # Guardar consulta como PDF    
         driver.execute_script('window.print();')
         time.sleep(1)
-        os.replace("Consultas\\Ver las notificaciones rojas.pdf", "Consultas\\INTERPOL_"+str(Documento[i])+".pdf")
+        os.replace("Consultas\\Ver las notificaciones rojas.PDF", "Consultas\\INTERPOL_"+str(Documento[i])+".PDF")
         interpol.append(str(var_INTERPOL))
+        documentos.append('INTERPOL_'+str(Documento[i])+'.PDF')
     except:
         driver.execute_script('window.print();')
         time.sleep(1)
@@ -222,8 +222,9 @@ for i in datos.index:
         # Guardar y renombrar consulta como PDF
         driver.execute_script('window.print();') 
         time.sleep(1)
-        os.replace("Consultas\\Sanctions List Search.pdf", "Consultas\\OFAC_"+str(Documento[i])+".pdf")  
+        os.replace("Consultas\\Sanctions List Search.PDF", "Consultas\\OFAC_"+str(Documento[i])+".PDF")  
         ofac.append(str(var_OFAC))
+        documentos.append('OFAC_'+str(Documento[i])+'.PDF')
     except:
         driver.execute_script('window.print();') 
         time.sleep(1)
@@ -266,7 +267,8 @@ for i in datos.index:
         time.sleep(1)
         driver.execute_script('window.print();')    
         time.sleep(1)
-        os.replace("Consultas\\Consulta tu Grupo Sisbén.pdf", "Consultas\\SISBEN_"+str(Documento[i])+".pdf")
+        os.replace("Consultas\\Consulta tu Grupo Sisbén.PDF", "Consultas\\SISBEN_"+str(Documento[i])+".PDF")
+        documentos.append('SISBEN_'+str(Documento[i])+'.PDF')
     except:
         sisben.append('FUENTE NO DISPONIBLE')
    #SIMIT
@@ -312,8 +314,9 @@ for i in datos.index:
         #Evidencia de la consulta
         driver.execute_script('window.print();')    
         time.sleep(1)
-        os.replace("Consultas\\SIMIT _ Estado de la Cuenta.pdf", "Consultas\\SIMIT_"+str(Documento[i])+".pdf")
+        os.replace("Consultas\\SIMIT _ Estado de la Cuenta.PDF", "Consultas\\SIMIT_"+str(Documento[i])+".PDF")
         simit.append(resultado)
+        documentos.append('SIMIT_'+str(Documento[i])+'.PDF')
     except:
         simit.append('FUENTE NO DISPONIBLE')
     #ONU
@@ -362,9 +365,9 @@ for i in datos.index:
     #Evidencia de la consulta
     driver.execute_script('document.title="ONU"')    
     driver.execute_script('window.print();')
-    os.replace("Consultas\\ONU.pdf", "Consultas\\ONU_"+str(Documento[i])+".pdf")
-
-    #Desmovilziados
+    os.replace("Consultas\\ONU.PDF", "Consultas\\ONU_"+str(Documento[i])+".PDF")
+    documentos.append('ONU_'+str(Documento[i])+'.PDF')
+    #Desmovilzados
     # Inicializamos el navegador
     try:
         driver.get('https://www.fiscalia.gov.co/colombia/justicia-transicional-2/consulta-postulados/')
@@ -394,15 +397,16 @@ for i in datos.index:
         driver.execute_script('document.title="Consulta postulados _ Fiscalía General de la Nación"')   
         driver.execute_script('window.print();')
         time.sleep(1)
-        os.replace("Consultas\\Consulta postulados _ Fiscalía General de la Nación.pdf", "Consultas\\DESMOVILIZADOS_"+str(Documento[i])+".pdf")
+        os.replace("Consultas\\Consulta postulados _ Fiscalía General de la Nación.PDF", "Consultas\\DESMOVILIZADOS_"+str(Documento[i])+".PDF")
     except:
         desmovilizados.append('FUENTE NO DISPONIBLE')  
         driver.execute_script('window.print();')
         time.sleep(1)
         try:
-            os.replace("Consultas\\www.fiscalia.gov.co.pdf", "Consultas\\DESMOVILIZADOS_"+str(Documento[i])+".pdf")
+            os.replace("Consultas\\www.fiscalia.gov.co.PDF", "Consultas\\DESMOVILIZADOS_"+str(Documento[i])+".PDF")
         except:
-            os.replace("Consultas\\Consulta postulados _ Fiscalía General de la Nación.pdf", "Consultas\\DESMOVILIZADOS_"+str(Documento[i])+".pdf")
+            os.replace("Consultas\\Consulta postulados _ Fiscalía General de la Nación.PDF", "Consultas\\DESMOVILIZADOS_"+str(Documento[i])+".PDF")
+        documentos.append('DESMOVILIZADOS_'+str(Documento[i])+'.PDF')
     
     #Rama unificada
     #Inicio de la navegación 
@@ -433,7 +437,7 @@ for i in datos.index:
             if(pop_up.__contains__('Hay más de mil registros') or  pop_up.__contains__('La consulta no generó resultados')):
                 driver.execute_script('window.print();')
                 time.sleep(1)
-                os.replace("Consultas\\Consulta de Procesos por Nombre o Razón Social- Consejo Superior de la Judicatura.pdf", "Consultas\\RAMA_UNIFICADA_"+str(Documento[i])+".pdf")            
+                os.replace("Consultas\\Consulta de Procesos por Nombre o Razón Social- Consejo Superior de la Judicatura.PDF", "Consultas\\RAMA_UNIFICADA_"+str(Documento[i])+".PDF")            
                 rama_unificada.append('SIN RESULTADO')
         except:
             pop_up='unico resultado'
@@ -450,7 +454,7 @@ for i in datos.index:
             files = sorted(
                 glob.iglob(files_path), key=os.path.getctime, reverse=True) 
             wdFormatPDF = 17
-            outputFile = os.path.join(directorio,"RAMA_UNIFICADA_"+str(Documento[i])+".pdf")
+            outputFile = os.path.join(directorio,"RAMA_UNIFICADA_"+str(Documento[i])+".PDF")
             word = win32com.client.Dispatch('Word.Application')
             doc = word.Documents.Open(files[0])
             doc.SaveAs(outputFile, FileFormat=wdFormatPDF)
@@ -463,7 +467,8 @@ for i in datos.index:
         rama_unificada.append('FUENTE NO DISPONIBLE')
         driver.execute_script('window.print();')
         time.sleep(1)
-        os.replace("Consultas\\Consulta de Procesos por Nombre o Razón Social- Consejo Superior de la Judicatura.pdf", "Consultas\\RAMA_UNIFICADA_"+str(Documento[i])+".pdf")
+        os.replace("Consultas\\Consulta de Procesos por Nombre o Razón Social- Consejo Superior de la Judicatura.PDF", "Consultas\\RAMA_UNIFICADA_"+str(Documento[i])+".PDF")
+    documentos.append('RAMA_UNIFICADA_'+str(Documento[i])+'.PDF')
 
     #Europol
     #Inicio de la navegación 
@@ -487,7 +492,7 @@ for i in datos.index:
             driver.save_screenshot(file_path)
             image_1 = Image.open(file_path)
             im_1 = image_1.convert('RGB')
-            im_1.save(r'C:\\Users\\CO-182\\Documents\\GitHub\\consulta_antecedentes\\Consultas\\EUROPOL_'+str(Documento[i])+r'.pdf')
+            im_1.save(r'C:\\Users\\CO-182\\Documents\\GitHub\\consulta_antecedentes\\Consultas\\EUROPOL_'+str(Documento[i])+r'.PDF')
             os.remove(file_path)
             europol.append('SIN RESULTADO')
         else:            
@@ -502,7 +507,7 @@ for i in datos.index:
                     time.sleep(1)
                     driver.execute_script('window.print();')
                     time.sleep(1)
-                    os.replace("Consultas\\Europe's most wanted _.pdf", "Consultas\\EUROPOL_"+str(Documento[i])+".pdf")
+                    os.replace("Consultas\\Europe's most wanted _.PDF", "Consultas\\EUROPOL_"+str(Documento[i])+".PDF")
                     break
             europol.append('CON HALLAZGO')
     except:
@@ -512,8 +517,9 @@ for i in datos.index:
         driver.save_screenshot(file_path)
         image_1 = Image.open(file_path)
         im_1 = image_1.convert('RGB')
-        im_1.save(r'C:\\Users\\CO-182\\Documents\\GitHub\\consulta_antecedentes\\Consultas\\EUROPOL_'+str(Documento[i])+r'.pdf')
+        im_1.save(r'C:\\Users\\CO-182\\Documents\\GitHub\\consulta_antecedentes\\Consultas\\EUROPOL_'+str(Documento[i])+r'.PDF')
         os.remove(file_path)
+    documentos.append('EUROPOL_'+str(Documento[i])+'.PDF')
 
     #Medidas correctivas
     #Inicio de la navegación 
@@ -569,7 +575,8 @@ for i in datos.index:
 
     time.sleep(1)
     try:
-        os.replace("Consultas\\MEDIDAS_CORRECTIVAS_.pdf", "Consultas\\MEDIDAS_CORRECTIVAS_"+str(Documento[i])+".pdf")
+        os.replace("Consultas\\MEDIDAS_CORRECTIVAS_.PDF", "Consultas\\MEDIDAS_CORRECTIVAS_"+str(Documento[i])+".PDF")
+        documentos.append('MEDIDAS_CORRECTIVAS_'+str(Documento[i])+'.PDF')
     except:
         continue
     #Antecedentes procuraduría
@@ -670,53 +677,288 @@ for i in datos.index:
                 try:
                     resultado=driver.find_element(By.XPATH,'//*[@id="divSec"]/h2[2]').text
                     if(resultado.__contains__('El ciudadano no presenta antecedentes')):
-                        antecedentes_procuraduria.append('SIN RESULTADOS')
+                        procuraduria.append('SIN RESULTADOS')
                         break
                     else:
-                        antecedentes_procuraduria.append('CON HALLAZGO') 
+                        procuraduria.append('CON HALLAZGO') 
                         break
                 except:
                     time.sleep(2)           
         else:
-            antecedentes_procuraduria.append('FUENTE NO DISPONIBLE')
+            procuraduria.append('FUENTE NO DISPONIBLE')
     except:
-            antecedentes_procuraduria.append('FUENTE NO DISPONIBLE')
+            procuraduria.append('FUENTE NO DISPONIBLE')
 
     driver.execute_script('window.print();')  
     time.sleep(1)  
     try:
-        os.replace("Consultas\\Consulta de Antecedentes.pdf", "Consultas\\ANTECEDENTES_PROCURADURIA_"+str(Documento[i])+".pdf") 
+        os.replace("Consultas\\Consulta de Antecedentes.PDF", "Consultas\\PROCURADURIA_"+str(Documento[i])+".PDF") 
     except:
         try:
-            os.replace("Consultas\\www.procuraduria.gov.co.pdf", "Consultas\\ANTECEDENTES_PROCURADURIA_"+str(Documento[i])+".pdf")
+            os.replace("Consultas\\www.procuraduria.gov.co.PDF", "Consultas\\PROCURADURIA_"+str(Documento[i])+".PDF")
         except:
             continue
+    documentos.append('PROCURADURIA_'+str(Documento[i])+'.PDF')
 
-    # pdfs = [os.path.join(directorio,'INTERPOL_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'OFAC_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'SISBEN_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'SIMIT_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'ONU_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'DESMOVILIZADOS_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'RAMA_UNIFICADA_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'EUROPOL_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'MEDIDAS_CORRECTIVAS_'+str(Documento[i])+'.pdf'),os.path.join(directorio,'ANTECEDENTES_PROCURADURIA_'+str(Documento[i])+'.pdf')]
+
+    #Antecedentes personeria
+    try:
+        # Inicio de la navegación  
+        driver.get('https://www.personeriabogota.gov.co/al-servicio-de-la-ciudad/expedicion-de-antecedentes')
+        driver.execute_script("window.scrollTo(0,700)")
+        time.sleep(2)
+        element = driver.find_element(By.ID,'ir-formulario')
+        driver.switch_to.frame(element)
+        WebDriverWait(driver,1)\
+            .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="root"]/div/p/div[1]/button')))\
+            .click()
+        time.sleep(1)
+        WebDriverWait(driver,1)\
+            .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="collapseAntecedete"]/div/form/div[1]/div[1]/select')))\
+            .send_keys(str(Tipo_Documento[i]))
+        time.sleep(1)
+        WebDriverWait(driver,1)\
+            .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="numDoc"]')))\
+            .send_keys(str(Documento[i]))    
+        time.sleep(2)
+        if(str(Tipo_Documento[i]).__contains__('CEDULA DE CIUDADANIA')):
+            for x in range(20):
+                pregunta = driver.find_element(By.XPATH,'//*[@id="collapseAntecedete"]/div/form/div[2]/div[2]/div/label').text
+                if(pregunta.__contains__('7 * 1')):
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="pregunta"]')))\
+                        .send_keys('7')
+                    time.sleep(1)
+                    break
+                elif(pregunta.__contains__('7 * 2')):
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="pregunta"]')))\
+                        .send_keys('14')
+                    time.sleep(1)
+                    break
+                elif(pregunta.__contains__('7 * 3')):
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="pregunta"]')))\
+                        .send_keys('21')
+                    time.sleep(1)
+                    break
+                elif(pregunta.__contains__('7 * 4')):
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="pregunta"]')))\
+                        .send_keys('28')
+                    time.sleep(1)
+                    break
+                elif(pregunta.__contains__('7 * 5')):
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="pregunta"]')))\
+                        .send_keys('35')
+                    time.sleep(1)
+                    break
+                elif(pregunta.__contains__('7 * 6')):
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="pregunta"]')))\
+                        .send_keys('42')
+                    time.sleep(1)
+                    break
+                elif(pregunta.__contains__('7 * 7')):
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="pregunta"]')))\
+                        .send_keys('49')
+                    time.sleep(1)
+                    break
+                elif(pregunta.__contains__('7 * 8')):
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="pregunta"]')))\
+                        .send_keys('56')
+                    time.sleep(1)
+                    break
+                elif(pregunta.__contains__('7 * 9')):
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="pregunta"]')))\
+                        .send_keys('63')
+                    time.sleep(1)
+                    break
+                else:
+                    driver.switch_to.default_content()
+                    driver.execute_script("location.reload()")
+                    time.sleep(2)
+                    element = driver.find_element(By.ID,'ir-formulario')
+                    driver.switch_to.frame(element)
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="root"]/div/p/div[1]/button')))\
+                        .click()
+                    time.sleep(1)
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="collapseAntecedete"]/div/form/div[1]/div[1]/select')))\
+                        .send_keys(str(Tipo_Documento[i]))
+                    time.sleep(1)
+                    WebDriverWait(driver,1)\
+                        .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="numDoc"]')))\
+                        .send_keys(str(Documento[i]))    
+                    time.sleep(2)
+        WebDriverWait(driver,1)\
+            .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="collapseAntecedete"]/div/form/button')))\
+            .click()
+        time.sleep(1)
+        for x in range(20):
+            try:
+                WebDriverWait(driver,1)\
+                .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="root"]/div/div[2]/form/div[2]/div/a')))\
+                .click()
+                break
+            except:
+                time.sleep(2)
+        time.sleep(1)
+        personeria.append('CONSULTADO')
+        try:
+            os.replace("Consultas\\antecedente_disciplinario.PDF","Consultas\\PERSONERIA_"+str(Documento[i])+".PDF")
+            documentos.append('PERSONERIA_'+str(Documento[i])+'.PDF')
+        except:
+            continue
+    except:    
+        personeria.append('FUENTE NO DISPONIBLE')
     
+    #PEPS
+    try:
+        #     # Inicio de la navegación  
+        driver.get('https://www.funcionpublica.gov.co/fdci/consultaCiudadana/consultaPEP')
+        driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+        time.sleep(1)
+
+        WebDriverWait(driver, 2)\
+            .until(EC.element_to_be_clickable((By.ID,'numeroDocumento')))\
+            .send_keys(str(Documento[i]))
+        time.sleep(1)
+
+        WebDriverWait(driver, 2)\
+            .until(EC.element_to_be_clickable((By.ID,'primerNombre')))\
+            .send_keys(str(Primer_Apellido[i]))
+        time.sleep(1)
+
+        WebDriverWait(driver, 2)\
+            .until(EC.element_to_be_clickable((By.ID,'segundoNombre')))\
+            .send_keys(str(Segundo_Nombre[i]))
+        time.sleep(1)
+
+        WebDriverWait(driver, 2)\
+            .until(EC.element_to_be_clickable((By.ID,'primerApellido')))\
+            .send_keys(str(Primer_Apellido[i]))
+        time.sleep(1)
+
+        WebDriverWait(driver, 2)\
+            .until(EC.element_to_be_clickable((By.ID,'segundoApellido')))\
+            .send_keys(str(Sengundo_Apellido[i]))
+        time.sleep(1)
+
+        WebDriverWait(driver, 2)\
+            .until(EC.element_to_be_clickable((By.ID,'find')))\
+            .click()
+        time.sleep(1)
+        result = driver.find_element(By.XPATH,'//*[@id="list-consultaCiudadana"]/div[3]').text
+        if(result.__contains__('No se encuentran declaraciones publicadas')):
+            resultado = 'SIN RESULTADOS'
+        else:
+            resultado = 'CON HALLAZGOS'
+    except:
+        resultado = 'fuente no disponible'
+    # Capturando evidencia de consulta
+    driver.execute_script('window.print();')  
+    time.sleep(1) 
+    try:
+        os.replace("Consultas\\Consulta Ciudadana - Personas Expuestas Políticamente (PEP) - Aplicativo por la Integridad Pública.PDF", "Consultas\\PEP_"+str(Documento[i])+".PDF") 
+        documentos.append('PEP_'+str(Documento[i])+'.PDF')
+    except:
+        continue
+    pep.append(resultado)
+
+    #CONSULTA PUBLICA DE PROFESIONALES - CPP
+    try:
+        if(str(Tipo_Documento[i]).__contains__('CEDULA DE CIUDADANIA') or str(Tipo_Documento[i]).__contains__('CEDULA DE EXTRANJERIA') ):
+            #     # Inicio de la navegación  
+            driver.get('https://sgr.jcc.gov.co:8181/apex/f?p=138:1:0:::::')
+            if(str(Tipo_Documento[i]).__contains__('CEDULA DE CIUDADANIA')):
+                t_doc='Cédula<'
+            else:
+                t_doc='CE'
+
+            WebDriverWait(driver, 2)\
+                .until(EC.element_to_be_clickable((By.ID,'P1_VALOR')))\
+                .send_keys(str(Documento[i]))
+            time.sleep(1)
+
+            WebDriverWait(driver, 2)\
+                .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="P1_CONSULTAR"]')))\
+                .click()
+            time.sleep(1)
+            result = driver.find_element(By.XPATH,'//*[@id="P1_MSG_ESTADO_CONTAINER"]/div').text
+            if(result.__contains__('No se encontraron datos')):
+                resultado='SIN RESULTADOS'
+            else:
+                resultado='CON HALLAZGOS'
+        else:
+            resultado='N/A'
+    except:
+        resultado = 'fuente no disponible'
+    # Capturando evidencia de consulta
+    time.sleep(2) 
+    driver.execute_script('window.print();')  
+    time.sleep(1) 
+    try:
+        os.replace("Consultas\\Consulta pública de profesionales.PDF", "Consultas\\CPP_"+str(Documento[i])+".PDF") 
+        documentos.append('CPP_'+str(Documento[i])+'.PDF')
+    except:
+        continue
+    cpp.append(resultado)
+
+    # pdfs = [os.path.join(directorio,'INTERPOL_'+str(Documento[i])+'.PDF'),os.path.join(directorio,'OFAC_'+str(Documento[i])+'.PDF'),os.path.join(directorio,'SISBEN_'+str(Documento[i])+'.PDF'),os.path.join(directorio,'SIMIT_'+str(Documento[i])+'.PDF'),os.path.join(directorio,'ONU_'+str(Documento[i])+'.PDF'),os.path.join(directorio,'DESMOVILIZADOS_'+str(Documento[i])+'.PDF'),os.path.join(directorio,'RAMA_UNIFICADA_'+str(Documento[i])+'.PDF'),os.path.join(directorio,'EUROPOL_'+str(Documento[i])+'.PDF'),os.path.join(directorio,'MEDIDAS_CORRECTIVAS_'+str(Documento[i])+'.PDF'),os.path.join(directorio,'PROCURADURIA_'+str(Documento[i])+'.PDF'),os.path.join(directorio,'PERSONERIA_'+str(Documento[i])+'.PDF')]
     
-    # merger = PdfFileMerger()
-
-    # for pdf in pdfs:
-    #     merger.append(pdf)
-    #     # time.sleep(1)
-    #     # os.remove(pdf)
-
-    # merger.write(os.path.join(directorio,'CONSULTA_'+str(Documento[i])+'.pdf'))
+    # Generar un PDF
+    merger = PdfFileMerger()
+    for PDF in documentos:
+        try:
+            merger.append(os.path.join(directorio,PDF))
+        except:
+            continue
+    # time.sleep(5)
+    # os.remove(PDF)
+    # doc=['PROCURADURIA_','RAMA_UNIFICADA_','SIMIT_','SISBEN_','INTERPOL_','DESMOVILIZADOS_','CPP_','INTERPOL_','PERSONERIA_','PEP_','EUROPOL_','OFA_','ONU_','MEDIDAS_CORRECTIVAS_','OFAC_']
+    # for pdf in doc:
+    #     try:
+    #         os.close(os.path.join(directorio,pdf,str(Documento[i]),'.PDF'))
+    #         time.sleep(1)
+    #         os.remove('Consultas\\'+pdf+str(Documento[i])+'.PDF')
+    #         print('Eliminado')
+    #     except:
+    #         print('no se pudo eliminar')
+    #         continue
+    # merger.write(os.path.join(directorio,'CONSULTA_'+str(Documento[i])+'.PDF'))
 
 
 driver.quit()
-#Dataframe de almacenamiento
-data = pd.DataFrame({'PRIMER_NOMBRE':Primer_Nombre, 'SEGUNDO_NOMBRE':Segundo_Nombre, 'PRIMER_APELLIDO':Primer_Apellido,'SEGUNDO_APELLIDO':Sengundo_Apellido,
-'EDAD':Edad,'FECHA_EXPEDICION':Fecha_Expedicion,'TIPO_DE_DEOCUMENTO':Tipo_Documento,'DOCUMENTO':Documento,'DEPARTAMENTO':Departamento,'CIUDAD':Ciudad,
-'INTERPOL':interpol,'OFAC':ofac,'SISBEN':sisben,'SIMIT':simit,'ONU':onu,'DESMOVILIZADOS':desmovilizados,'RAMA_UNIFICADA':rama_unificada,'EUROPOL':europol,'MEDIDAS CORRECTIVAS':medidas_correctivas,'ANTECEDENTES_PROCURADURIA':antecedentes_procuraduria})
-#,'proveedores_ficticios',
-# 'concordato','desmovilizados',
-# 'rama_judicial','ruaf','secop_s',
-# 'peps','rnmc','libreta_militar','contadores_sancionados',
-# 'garantias_mobiliarias','secop'
-data.to_csv('Reporte/Antecedentes.csv', index=True)
-
+print(len(interpol))
+try:
+    #Dataframe de almacenamiento
+    data = pd.DataFrame({'PRIMER_NOMBRE':Primer_Nombre, 'SEGUNDO_NOMBRE':Segundo_Nombre, 'PRIMER_APELLIDO':Primer_Apellido,'SEGUNDO_APELLIDO':Sengundo_Apellido,
+    'EDAD':Edad,'FECHA_EXPEDICION':Fecha_Expedicion,'TIPO_DE_DEOCUMENTO':Tipo_Documento,'DOCUMENTO':Documento,'DEPARTAMENTO':Departamento,'CIUDAD':Ciudad,
+    'INTERPOL':interpol,'OFAC':ofac,'SISBEN':sisben,'SIMIT':simit,'ONU':onu,'DESMOVILIZADOS':desmovilizados,'RAMA_UNIFICADA':rama_unificada,'EUROPOL':europol,'MEDIDAS CORRECTIVAS':medidas_correctivas,'PROCURADURIA':procuraduria,'PERSONERIA':personeria,'PEP':pep,'CPP':cpp})
+    # 'libreta_militar','garantias_mobiliarias'
+    data.to_csv('Reporte/Antecedentes.csv', index=True)
+    print('TERMINADO CORRECTAMENTE')
+except:
+    print('NO SE PUDO GENERAR EL ARCHIVO')
+    print('INTERPOL',len(interpol))
+    print('OFAC',len(ofac))
+    print('SISBEN',len(sisben))
+    print('SIMIT',len(simit))
+    print('ONU',len(onu))
+    print('DESMOVILIZADOS',len(desmovilizados))
+    print('RAMA UNIFICADA',len(rama_unificada))
+    print('EUROPOL',len(europol))
+    print('MEDIDAS CORRECTIVAS',len(medidas_correctivas))
+    print('PROCURADURIA',len(procuraduria))
+    print('EPRSONERIA',len(personeria))
+    print('PEP',len(pep))
+    print('CPP',len(cpp))
 
 
 # EUROPOL
