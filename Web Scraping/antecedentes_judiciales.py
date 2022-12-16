@@ -20,6 +20,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
+from anticaptchaofficial.recaptchav2proxyless import *
 
 #Variables Globales
 #result = list()
@@ -152,17 +153,25 @@ for i in datos.index:
         WebDriverWait(driver,1)\
             .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="cedulaTipo"]')))\
             .send_keys(str(Tipo_Documento[i]))
-        time.sleep(1)
-        for f in range(10):
-            frme = driver.find_element(By.XPATH,'//*[@id="captchaAntecedentes"]/div/div/iframe')
-            driver.switch_to.frame(frme)
-            WebDriverWait(driver,1)\
-                .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="recaptcha-anchor"]')))\
-                .click()
-            time.sleep(5)
-            driver.switch_to.default_content()
-            driver.execute_script("location.reload()")        
-            time.sleep(5)
+
+        #Obtener llave y la url del reCaptcha
+        site_key=driver.find_element(By.XPATH,'//*[@id="captcha"]')
+        site_key = str(site_key.get_attribute('data-sitekey'))
+        site_url=driver.find_element(By.XPATH,'//*[@id="captchaAntecedentes"]/div/div/iframe')
+        site_url = str(site_url.get_attribute('src'))
+        print ('site_key: ' + site_key)
+        print ('site_url: ' + site_url)
+        
+        # for f in range(10):
+        #     frme = driver.find_element(By.XPATH,'//*[@id="captchaAntecedentes"]/div/div/iframe')
+        #     driver.switch_to.frame(frme)
+        #     WebDriverWait(driver,1)\
+        #         .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="recaptcha-anchor"]')))\
+        #         .click()
+        #     time.sleep(5)
+        #     driver.switch_to.default_content()
+        #     driver.execute_script("location.reload()")        
+        #     time.sleep(5)
     except:
         antecedentes_judiciales.append('FUENTE NO DISPONIBLE')
 
