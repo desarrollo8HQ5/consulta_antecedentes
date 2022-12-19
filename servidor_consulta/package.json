@@ -1,0 +1,17 @@
+{
+  "name": "servidor_consulta",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.20",
+    "underscore": "^1.13.6",
+    "xpress": "^2.4.6"
+  }
+}
