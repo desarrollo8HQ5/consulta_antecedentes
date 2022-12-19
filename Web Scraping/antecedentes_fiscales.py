@@ -20,6 +20,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
+from anticaptchaofficial.recaptchav2proxyless import *
+
+
 
 archivo = pd.read_csv("C:/Users/CO-182/Documents/GitHub/consulta_antecedentes/Datos/Con Hallazgos.csv")
 #Numero de registros a buscar   
@@ -118,8 +121,11 @@ for i in datos.index:
     time.sleep(1)
     driver.execute_script('window.scrollTo(0,800)')
     time.sleep(1)
-    elemet=driver.find_element(By.XPATH,'//*[@id="fragment-0-ttuq"]/div/iframe')
-    driver.switch_to.frame(elemet)
+    elemnt=driver.find_element(By.XPATH,'//*[@id="fragment-0-ttuq"]/div/iframe')
+    # Obtener url del reCaptcha
+    site_url = str(elemnt.get_attribute('src'))
+    # Cambiar al iframe
+    driver.switch_to.frame(elemnt)
     WebDriverWait(driver, 2)\
         .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="ddlTipoDocumento"]')))\
         .send_keys(str(Tipo_Documento[i]))
@@ -128,7 +134,35 @@ for i in datos.index:
     WebDriverWait(driver, 2)\
         .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="txtNumeroDocumento"]')))\
         .send_keys(str(Documento[i]))
-    time.sleep(20)
+    # Solución captcha   
+
+    #Obtener llave del reCaptcha
+    site_key=driver.find_element(By.XPATH,'//*[@id="MainContent_recaptcha"]')
+    site_key = str(site_key.get_attribute('data-sitekey'))    
+    
+
+    print ('site_key: ' + site_key)
+    print ('site_url: ' + site_url)
+    # Mostrar espacio de key_response
+    key_response = driver.find_element(By.XPATH,'//*[@id="g-recaptcha-response"]')
+    driver.execute_script('var element=document.getElementById("g-recaptcha-response");element.style.display="block";')
+    
+    # Llamado al api para solucionar el captcha
+
+    solver = recaptchaV2Proxyless()
+    solver.set_verbose(1)
+    solver.set_key("cfe8dbdca00a0661d2d6d60bc14ef04b")
+    solver.set_website_url(site_url)
+    solver.set_website_key(site_key)
+    solver.set_soft_id(0)
+
+    g_response = solver.solve_and_return_solution()
+    if g_response != 0:
+        print ("g-response: "+g_response)
+        driver.execute_script("""document.getElementById("g-recaptcha-response").innerHTML = arguments[0]""",g_response)
+    else:
+        print ("task finished with error "+solver.error_code)
+
     WebDriverWait(driver,1)\
         .until(EC.element_to_be_clickable((By.XPATH,'//*[@id="btnBuscar"]')))\
         .click()
